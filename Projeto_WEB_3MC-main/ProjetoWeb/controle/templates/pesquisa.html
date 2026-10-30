@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Pesquisa - V-Library</title>
+</head>
+<body>
+
+<div id="overlay" onclick="fecharMenu()"></div>
+<div id="sidebar">
+    <div class="sidebar-header">
+        <span onclick="fecharMenu()" class="fechar-sidebar">✕</span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/">🏠 Início</a>
+        <a href="{% url 'categorias' %}">📚 Categorias</a>
+        <a href="{% url 'mais_vendidos' %}">🔥 Mais Vendidos</a>
+        <a href="{% url 'autores' %}">✍️ Autores</a>
+        <a href="{% url 'promocoes' %}">🏷️ Promoções</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}">👤 Meu Perfil</a>
+        {% else %}
+            <a href="{% url 'login' %}">🔑 Entrar</a>
+        {% endif %}
+    </nav>
+</div>
+
+<header>
+    <div class="topo">
+        <button class="menu" onclick="abrirMenu()">☰</button>
+        <a href="/"><img src="{% static 'img/logosemcerto1.png' %}" alt="Logo" class="logo"></a>
+    </div>
+    <form action="{% url 'pesquisa' %}" method="GET" class="pesquisa">
+        <input type="text" name="q" placeholder="Pesquisar livros...">
+        <button type="submit">🔎︎</button>
+    </form>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}"><img src="{% static 'img/usuario.png' %}" alt="Perfil" class="perfil-icon"></a>
+        {% else %}
+            <a href="{% url 'login' %}">Entrar</a>
+        {% endif %}
+        <a href="{% url 'carrinho' %}"><img src="{% static 'img/carrinho.png' %}" alt="Carrinho" class="carrinho"></a>
+    </nav>
+</header>
+
+<section class="catalogo">
+    <h2 class="titulo-catalogo">Resultado da pesquisa</h2>
+    <div class="grid-livros">
+        
+        {% for livro in livros %}
+        <div class="card-livro" style="cursor:pointer;" onclick="window.location.href='{% url 'produto_detalhe' livro.id %}'">
+            {% if livro.em_promocao %}
+                <span class="badge-promocao">Promoção</span>
+            {% endif %}
+            
+            <img src="{{ livro.get_imagem }}" alt="{{ livro.nome }}">
+            <h3 id="nome-{{ livro.id }}">{{ livro.nome }}</h3>
+            <p class="autor-livro">{{ livro.autor.nome }}</p>
+            
+            {% if livro.em_promocao %}
+                <span class="preco-antigo">R$ {{ livro.preco|floatformat:2 }}</span>
+                <p class="preco preco-promocional" id="preco-{{ livro.id }}">R$ {{ livro.preco_promocional|floatformat:2 }}</p>
+            {% else %}
+                <p class="preco" id="preco-{{ livro.id }}">R$ {{ livro.preco|floatformat:2 }}</p>
+            {% endif %}
+            
+            <button onclick="event.stopPropagation(); adicionarAoCarrinho('{{ livro.id }}')">Comprar</button>
+        </div>
+        {% empty %}
+            {% if query %}
+                <p style="text-align:center; color:#999; width:100%;">Nenhum resultado para "{{ query }}".</p>
+            {% endif %}
+        {% endfor %}
+        
+    </div>
+</section>
+
+<div id="notificacao">✓ Adicionado ao carrinho!</div>
+
+<script>
+    function abrirMenu() {
+        document.getElementById('sidebar').classList.add('aberto');
+        document.getElementById('overlay').style.display = 'block';
+    }
+    
+    function fecharMenu() {
+        document.getElementById('sidebar').classList.remove('aberto');
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    function adicionarAoCarrinho(id) {
+        const nome = document.getElementById(`nome-${id}`).innerText;
+        const precoTexto = document.getElementById(`preco-${id}`).innerText;
+        const preco = parseFloat(precoTexto.replace("R$", "").replace(",", ".").trim());
+        const imgElement = document.getElementById(`nome-${id}`).parentElement.querySelector('img');
+        const imagemSrc = imgElement ? imgElement.src : '';
+
+        let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const itemExistente = carrinho.find(item => String(item.id) === String(id));
+
+        if (itemExistente) {
+            itemExistente.qtd += 1;
+        } else {
+            carrinho.push({ id: String(id), nome, preco, qtd: 1, imagem: imagemSrc, selecionado: true });
+        }
+
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+
+        const toast = document.getElementById('notificacao');
+        toast.style.display = 'block';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
+        }, 2000);
+    }
+</script>
+
+{% include 'footer.html' %}
+</body>
+</html>

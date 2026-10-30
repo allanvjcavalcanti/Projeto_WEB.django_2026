@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>{{ produto.nome }} - V-Library</title>
+</head>
+<body>
+
+<div id="overlay" onclick="fecharMenu()"></div>
+<div id="sidebar">
+    <div class="sidebar-header">
+        <span onclick="fecharMenu()" class="fechar-sidebar">✕</span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/">🏠 Início</a>
+        <a href="{% url 'categorias' %}">📚 Categorias</a>
+        <a href="{% url 'mais_vendidos' %}">🔥 Mais Vendidos</a>
+        <a href="{% url 'autores' %}">✍️ Autores</a>
+        <a href="{% url 'promocoes' %}">🏷️ Promoções</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}">👤 Meu Perfil</a>
+        {% else %}
+            <a href="{% url 'login' %}">🔑 Entrar</a>
+        {% endif %}
+    </nav>
+</div>
+
+<header>
+    <div class="topo">
+        <button class="menu" onclick="abrirMenu()">☰</button>
+        <a href="/"><img src="{% static 'img/logosemcerto1.png' %}" alt="Logo" class="logo"></a>
+    </div>
+    <form action="{% url 'pesquisa' %}" method="GET" class="pesquisa">
+        <input type="text" name="q" placeholder="Pesquisar livros...">
+        <button type="submit">🔎︎</button>
+    </form>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}"><img src="{% static 'img/usuario.png' %}" alt="Perfil" class="perfil-icon"></a>
+        {% else %}
+            <a href="{% url 'login' %}">Entrar</a>
+        {% endif %}
+        <a href="{% url 'carrinho' %}"><img src="{% static 'img/carrinho.png' %}" alt="Carrinho" class="carrinho"></a>
+    </nav>
+</header>
+
+<div class="breadcrumb-detalhe">
+    <a href="/">Início</a> › <a href="{% url 'categorias' %}">Categorias</a> › {{ produto.nome }}
+</div>
+
+<div class="produto-detalhe-container">
+    <div>
+        <img src="{{ produto.get_imagem }}" alt="{{ produto.nome }}" class="produto-capa" id="img-produto">
+    </div>
+    <div class="produto-info">
+        <h1>{{ produto.nome }}</h1>
+        <p class="autor-detalhe">✍️ {{ produto.autor.nome }}</p>
+        <p class="avaliacao">★★★★☆ <span style="font-size:16px; color:#888;">({{ produto.avaliacoes }} avaliações)</span></p>
+        <p class="descricao-titulo">Descrição</p>
+        <p class="descricao">{{ produto.descricao }}</p>
+        
+        <div class="container-precos">
+            {% if produto.em_promocao %}
+                <span id="preco-velho" class="preco-antigo-detalhe" style="display:block;">R$ {{ produto.preco|floatformat:2 }}</span>
+                <p id="preco-atual" class="preco-detalhe-promocional">R$ {{ produto.preco_promocional|floatformat:2 }}</p>
+            {% else %}
+                <p id="preco-atual" class="preco-detalhe">R$ {{ produto.preco|floatformat:2 }}</p>
+            {% endif %}
+            <span id="tag-porcentagem" class="badge-porcentagem"></span>
+        </div>
+        
+        <p id="texto-parcela" class="preco-parcelado">ou 3x de {{ produto.preco_parcelado }} sem juros</p>
+        <div class="produto-acoes">
+            <button class="btn-comprar" onclick="comprarAgora()">🛒 Comprar Agora</button>
+            <button class="btn-carrinho" onclick="adicionarCarrinho()">+ Adicionar ao Carrinho</button>
+        </div>
+        
+        <div class="produto-detalhes-extras">
+            <h3>📋 Detalhes do Produto</h3>
+            <div class="detalhe-linha"><span>Editora</span><span>{{ produto.editora }}</span></div>
+            <div class="detalhe-linha"><span>Páginas</span><span>{{ produto.paginas }}</span></div>
+            <div class="detalhe-linha"><span>Idioma</span><span>{{ produto.idioma }}</span></div>
+            <div class="detalhe-linha"><span>Categoria</span><span>{{ produto.categoria.nome }}</span></div>
+            <div class="detalhe-linha"><span>ISBN</span><span>{{ produto.isbn }}</span></div>
+        </div>
+    </div>
+</div>
+
+<section class="avaliacoes-area">
+    <h2>Avaliações</h2>
+    {% for avaliacao in avaliacoes %}
+    <div class="avaliacao-card">
+        <strong>{{ avaliacao.nome_cliente }}</strong>
+        <p>
+            {% for i in "12345" %}
+                {% if forloop.counter <= avaliacao.estrelas %}⭐{% endif %}
+            {% endfor %}
+        </p>
+        <span>{{ avaliacao.comentario }}</span>
+    </div>
+    {% empty %}
+    <p>Nenhuma avaliação para este produto ainda.</p>
+    {% endfor %}
+</section>
+
+<section class="livros-semelhantes">
+    <h2>Livros semelhantes</h2>
+    <div class="grid-livros">
+        {% for livro in semelhantes %}
+        <div class="card-livro">
+            <img src="{{ livro.imagem.url }}" alt="{{ livro.nome }}">
+            <h3>{{ livro.nome }}</h3>
+            <p>{{ livro.autor.nome }}</p>
+            <span class="preco">R$ {{ livro.preco }}</span>
+            <a href="/produto/{{ livro.id }}/" class="btn-livro">Ver detalhes</a>
+        </div>
+        {% empty %}
+        <p>Nenhum livro semelhante encontrado.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<div id="notificacao">✓ Adicionado ao carrinho!</div>
+
+<script>
+    function abrirMenu() {
+        document.getElementById('sidebar').classList.add('aberto');
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function fecharMenu() {
+        document.getElementById('sidebar').classList.remove('aberto');
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    // Coleta o preço atual baseado no que o Django renderizou na página
+    const precoTexto = document.getElementById('preco-atual').innerText;
+    const precoLimpo = parseFloat(precoTexto.replace("R$", "").replace(",", ".").trim()) || 0;
+
+    const produto = {
+        id: String("{{ produto.id }}"),
+        nome: "{{ produto.nome }}",
+        preco: precoLimpo,
+        imagem: document.getElementById('img-produto') ? document.getElementById('img-produto').src : ''
+    };
+
+    function adicionarCarrinho() {
+        let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const existente = carrinho.find(item => item.id == produto.id);
+        if (existente) {
+            existente.qtd += 1;
+        } else {
+            carrinho.push({ id: produto.id, nome: produto.nome, preco: produto.preco, qtd: 1, imagem: produto.imagem, selecionado: true });
+        }
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+
+        const toast = document.getElementById('notificacao');
+        toast.style.display = 'block';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
+        }, 2000);
+    }
+
+    function comprarAgora() {
+        adicionarCarrinho();
+        window.location.href = "{% url 'carrinho' %}";
+    }
+</script>
+
+{% include 'footer.html' %}
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Perfil</title>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo-link"><img src="{% static 'img/logosemcerto1.png' %}" alt="Logo" class="logo-nav"></a>
+        <div class="nav-links">
+            <a href="/" class="menu-link">Home</a>
+            <a href="{% url 'perfil' %}" class="profile-icon active">👤</a>
+        </div>
+    </div>
+</header>
+
+<main class="perfil-layout">
+    <section class="perfil-sidebar">
+        <div class="user-card">
+            <div class="avatar-letter">{{ usuario.username|slice:":1"|upper }}</div>
+            <h2>{{ usuario.username }}</h2>
+            <p>{{ usuario.email }}</p>
+            <a href="{% url 'logout' %}" class="btn-sair">Sair</a>
+        </div>
+    </section>
+
+    <section class="perfil-content">
+        <div class="card-dados">
+            <h2>Informações da Conta</h2>
+            <div class="info-group">
+                <label>Usuário</label>
+                <p>{{ usuario.username }}</p>
+            </div>
+            <form method="POST" action="{% url 'perfil' %}">
+                {% csrf_token %}
+                <div class="info-group">
+                    <label>E-mail</label>
+                    <input class="input-padrao" type="email" name="email" value="{{ usuario.email }}">
+                </div>
+                <div class="info-group">
+                    <label>Telefone</label>
+                    <input class="input-padrao" type="text" name="telefone" value="{{ perfil.telefone }}">
+                </div>
+                <div class="info-group">
+                    <label>Endereço</label>
+                    <input class="input-padrao" type="text" name="endereco" value="{{ perfil.endereco }}">
+                </div>
+                <div class="info-group">
+                    <label>CEP</label>
+                    <input class="input-padrao" type="text" name="cep" value="{{ perfil.cep }}">
+                </div>
+                <div class="info-group">
+                    <label>Cidade</label>
+                    <input class="input-padrao" type="text" name="cidade" value="{{ perfil.cidade }}">
+                </div>
+                <div class="info-group">
+                    <label>Estado</label>
+                    <input class="input-padrao" type="text" name="estado" value="{{ perfil.estado }}">
+                </div>
+                <button type="submit" class="btn-acesso" style="margin-top:10px;">Salvar alterações</button>
+            </form>
+        </div>
+
+        <div class="card-pedidos" style="margin-top:20px;">
+            <h2>Meus Pedidos</h2>
+            <div class="tabela-container">
+                {% if pedidos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data</th>
+                            <th>Itens</th>
+                            <th>Total</th>
+                            <th>Pagamento</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>#{{ pedido.id }}</td>
+                            <td>{{ pedido.criado_em|date:"d/m/Y" }}</td>
+                            <td>
+                                {% for item in pedido.itens.all %}
+                                    {{ item.livro.nome }} ({{ item.quantidade }}x){% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>R$ {{ pedido.total|floatformat:2 }}</td>
+                            <td>{{ pedido.metodo_pagamento }}</td>
+                            <td>
+                                {% if pedido.status == 'pago' %}
+                                    <span style="color:#28a745; font-weight:bold;">✔ Pago</span>
+                                {% elif pedido.status == 'enviado' %}
+                                    <span style="color:#007bff; font-weight:bold;">🚚 Enviado</span>
+                                {% elif pedido.status == 'entregue' %}
+                                    <span style="color:#416677; font-weight:bold;">📦 Entregue</span>
+                                {% elif pedido.status == 'cancelado' %}
+                                    <span style="color:#dc3545; font-weight:bold;">✕ Cancelado</span>
+                                {% else %}
+                                    <span style="color:#ffc107; font-weight:bold;">⏳ Pendente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="vazio">Você ainda não fez nenhum pedido.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</main>
+
+{% include 'footer.html' %}
+</body>
+</html>

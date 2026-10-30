@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Autores - V-Library</title>
+</head>
+<body>
+
+<div id="overlay" onclick="fecharMenu()"></div>
+<div id="sidebar">
+    <div class="sidebar-header">
+        <span onclick="fecharMenu()" class="fechar-sidebar">✕</span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/">🏠 Início</a>
+        <a href="{% url 'categorias' %}">📚 Categorias</a>
+        <a href="{% url 'mais_vendidos' %}">🔥 Mais Vendidos</a>
+        <a href="{% url 'autores' %}">✍️ Autores</a>
+        <a href="{% url 'promocoes' %}">🏷️ Promoções</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}">👤 Meu Perfil</a>
+        {% else %}
+            <a href="{% url 'login' %}">🔑 Entrar</a>
+        {% endif %}
+    </nav>
+</div>
+
+<header>
+    <div class="topo">
+        <button class="menu" onclick="abrirMenu()">☰</button>
+        <a href="/"><img src="{% static 'img/logosemcerto1.png' %}" alt="Logo" class="logo"></a>
+    </div>
+    <form action="{% url 'pesquisa' %}" method="GET" class="pesquisa">
+        <input type="text" name="q" placeholder="Pesquisar livros...">
+        <button type="submit">🔎︎</button>
+    </form>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil' %}"><img src="{% static 'img/usuario.png' %}" alt="Perfil" class="perfil-icon"></a>
+        {% else %}
+            <a href="{% url 'login' %}">Entrar</a>
+        {% endif %}
+        <a href="{% url 'carrinho' %}"><img src="{% static 'img/carrinho.png' %}" alt="Carrinho" class="carrinho"></a>
+    </nav>
+</header>
+
+<section class="sessao-autores">
+    <h2 class="titulo-autores">Autores</h2>
+    <div class="autores-grid">
+        <div class="autor-card"><img src="{% static 'img/george.png' %}" alt="George Orwell"><p>George Orwell</p></div>
+        <div class="autor-card"><img src="{% static 'img/clarice.png' %}" alt="Clarice Lispector"><p>Clarice Lispector</p></div>
+        <div class="autor-card"><img src="{% static 'img/jorgeamado.png' %}" alt="Jorge Amado"><p>Jorge Amado</p></div>
+        <div class="autor-card"><img src="{% static 'img/machadodeassis.png' %}" alt="Machado de Assis"><p>Machado de Assis</p></div>
+        <div class="autor-card"><img src="{% static 'img/virginia.png' %}" alt="Virginia Woolf"><p>Virginia Woolf</p></div>
+        <div class="autor-card"><img src="{% static 'img/max.png' %}" alt="Karl Marx"><p>Karl Marx</p></div>
+        <div class="autor-card"><img src="{% static 'img/collen.png' %}" alt="Colleen Hoover"><p>Colleen Hoover</p></div>
+    </div>
+</section>
+
+<script>
+    function abrirMenu() {
+        document.getElementById('sidebar').classList.add('aberto');
+        document.getElementById('overlay').style.display = 'block';
+    }
+    function fecharMenu() {
+        document.getElementById('sidebar').classList.remove('aberto');
+        document.getElementById('overlay').style.display = 'none';
+    }
+</script>
+
+{% include 'footer.html' %}
+</body>
+</html>

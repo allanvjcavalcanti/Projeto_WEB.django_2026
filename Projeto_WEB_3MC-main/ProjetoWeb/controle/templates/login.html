@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Login</title>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo-link">
+            <img src="{% static 'img/logosemcerto1.png' %}" alt="Logo" class="logo-nav">
+        </a>
+        <div class="nav-links">
+            <a href="/" class="menu-link">Home</a>
+        </div>
+    </div>
+</header>
+
+<div class="main-auth">
+    <div class="box-form">
+        <div id="login-container">
+            <h2>Login</h2>
+            <form method="POST" action="{% url 'auth' %}">
+                {% csrf_token %}
+                <input type="text" name="user" placeholder="Usuário" class="input-padrao" required>
+                <input type="password" name="pass" placeholder="Senha" class="input-padrao" required>
+                <button type="submit" class="btn-acesso">Entrar</button>
+                {% if erro %}<p style="color: red;">{{ erro }}</p>{% endif %}
+            </form>
+            <p style="margin-top: 10px;">
+                <a href="#" style="font-size: 13px; font-weight: normal; color: #666;">Esqueceu a senha?</a>
+            </p>
+            <p>Novo por aqui? <a href="#" onclick="mudar(event, 'reg')">Crie uma conta</a></p>
+        </div>
+
+        <div id="register-container" style="display: none;">
+            <h2>Cadastro</h2>
+            <form method="POST" action="{% url 'cadastro' %}">
+                {% csrf_token %}
+                <input type="text" name="nome" placeholder="Nome completo" class="input-padrao" required>
+                <input type="email" name="email" placeholder="E-mail" class="input-padrao" required>
+                <input type="password" name="senha" placeholder="Senha" class="input-padrao" required>
+                <button type="submit" class="btn-acesso">Cadastrar</button>
+                {% if erro_cadastro %}<p style="color: red;">{{ erro_cadastro }}</p>{% endif %}
+            </form>
+            <p>Já tem conta? <a href="#" onclick="mudar(event, 'log')">Voltar para o login</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function mudar(e, tipo) {
+        e.preventDefault();
+        const log = document.getElementById('login-container');
+        const reg = document.getElementById('register-container');
+        if (tipo === 'reg') {
+            log.style.display = 'none';
+            reg.style.display = 'block';
+        } else {
+            log.style.display = 'block';
+            reg.style.display = 'none';
+        }
+    }
+</script>
+
+{% include 'footer.html' %}
+</body>
+</html>
