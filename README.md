@@ -51,3 +51,9 @@ The application allows users to browse a book catalog, search for titles, explor
 ## 🎯 Objetivo | Purpose
 
 Projeto desenvolvido como prática de desenvolvimento web, integração entre tecnologias e construção de aplicações utilizando Django.
+
+## 📬 Contato | Contact
+
+Desenvolvido por **Allan Victor V. J. Cavalcanti**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/allanvjcavalcanti/)
